@@ -42,7 +42,7 @@ export const ProductsList = styled.div`
       }
 
       &:last-child {
-        width: 20%;
+        width: 10%;
         padding-right: 1.5rem;
       }
     }
