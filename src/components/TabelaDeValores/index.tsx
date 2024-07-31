@@ -1,4 +1,17 @@
-import { Box, Grid, TablePagination, IconButton, Icon } from '@mui/material'
+import {
+  Box,
+  Grid,
+  TablePagination,
+  IconButton,
+  Icon,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
+  Button,
+  TextField,
+} from '@mui/material'
 import { ProductsList } from './style'
 import { useState } from 'react'
 import { Financa } from '../../models/tabelaGeral'
@@ -119,6 +132,9 @@ const finance: Financa[] = [
 export function TabelaDeValores() {
   const [page, setPage] = useState(0)
   const [pageSize, setPageSize] = useState(10)
+  const [edit, setEdit] = useState(false)
+  const [myFinances, setFinances] = useState<Financa>()
+
   // const [totalElements, setTotalElements] = useState(5)
   // const [isLoading, setIsLoading] = useState(false)
 
@@ -138,7 +154,8 @@ export function TabelaDeValores() {
   // }
 
   const handelEdit = (item: Financa) => {
-    console.log(item)
+    setFinances(item)
+    setEdit(true)
   }
   const handelDelete = (item: number) => {
     console.log(item)
@@ -236,6 +253,102 @@ export function TabelaDeValores() {
           />
         </Box>
       )}
+      <Box>
+        <Dialog open={edit}>
+          <DialogTitle
+            sx={{ background: '#232f3e', color: '#f7f7f7' }}
+            textAlign="center"
+          >
+            Editar Finance
+          </DialogTitle>
+          <DialogContent>
+            <DialogContentText>
+              <Grid container spacing={1} mt={3}>
+                <Grid item xs={12}>
+                  <TextField
+                    label="Data"
+                    type="date"
+                    value={myFinances?.data}
+                    fullWidth
+                    InputLabelProps={{ shrink: true }}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <TextField
+                    label="Categoria"
+                    fullWidth
+                    value={myFinances?.categoria}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <TextField
+                    label="Descrição"
+                    fullWidth
+                    value={myFinances?.descricao}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <TextField label="Tipo" fullWidth value={myFinances?.tipo} />
+                </Grid>
+                <Grid item xs={12}>
+                  <TextField
+                    label="Valor (R$)"
+                    fullWidth
+                    value={myFinances?.valor}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <TextField
+                    label="Categoria Despesas"
+                    fullWidth
+                    value={myFinances?.fixoVariavel}
+                  />
+                </Grid>
+                {myFinances?.parcelas && (
+                  <Grid item xs={12}>
+                    <TextField
+                      label="Parcelas"
+                      fullWidth
+                      value={myFinances?.parcelas}
+                    />
+                  </Grid>
+                )}
+                <Grid item xs={12}>
+                  <TextField
+                    label="Observações"
+                    fullWidth
+                    value={myFinances?.observacoes}
+                  />
+                </Grid>
+              </Grid>
+            </DialogContentText>
+          </DialogContent>
+          <DialogActions>
+            <Grid container justifyContent="end" spacing={1} mr={2}>
+              <Grid item xs={3}>
+                <Button
+                  fullWidth
+                  variant="contained"
+                  onClick={() => setEdit(false)}
+                  color="primary"
+                >
+                  Salvar
+                </Button>
+              </Grid>
+              <Grid item xs={3}>
+                <Button
+                  fullWidth
+                  variant="contained"
+                  onClick={() => setEdit(false)}
+                  color="warning"
+                >
+                  Cancel
+                </Button>
+              </Grid>
+            </Grid>
+          </DialogActions>
+        </Dialog>
+      </Box>
     </Box>
   )
 }
