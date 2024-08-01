@@ -1,12 +1,13 @@
-import { Box, Grid, Typography, TextField } from '@mui/material'
+import { Box, Grid, Typography } from '@mui/material'
 import { useState } from 'react'
 import { TabelaDeValores } from '../../components/TabelaDeValores'
+import { formatCurrency } from '../../functions'
 
 export function Dashboard() {
-  const [valorSalario, setValorSalario] = useState('')
+  const [total, setTotal] = useState(0)
 
-  const addValuePrice = (value: string) => {
-    setValorSalario(value)
+  const handleTotalChange = (newTotal: number) => {
+    setTotal(newTotal)
   }
 
   return (
@@ -20,17 +21,14 @@ export function Dashboard() {
         <Grid item xs={12}>
           <hr style={{ margin: '1rem 0 1rem 0' }} />
         </Grid>
-        <Grid item xs={6}>
+        <Grid item xs={8}>
           <Typography variant="h5">My Finances Dasboard</Typography>
         </Grid>
-        <Grid item xs={6} justifyContent="end">
-          <TextField
-            label="Valor recebido Mensal"
-            onChange={(e) => addValuePrice(e.target.value)}
-          />
+        <Grid item xs={4} justifyContent="end">
+          <h3>Saldo/Debito Mensal: {formatCurrency(total)}</h3>
         </Grid>
         <Grid item xs={12}>
-          <TabelaDeValores />
+          <TabelaDeValores onTotalChange={handleTotalChange} />
         </Grid>
       </Grid>
     </Box>

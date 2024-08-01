@@ -11,10 +11,16 @@ import {
   DialogActions,
   Button,
   TextField,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  SelectChangeEvent,
 } from '@mui/material'
 import { ProductsList } from './style'
-import { useState } from 'react'
+import { ChangeEvent, useEffect, useState } from 'react'
 import { Financa } from '../../models/tabelaGeral'
+import { formatCurrency, formatDate } from '../../functions'
 
 const finance: Financa[] = [
   {
@@ -23,7 +29,7 @@ const finance: Financa[] = [
     categoria: 'Alimentação',
     descricao: 'Supermercado XYZ',
     tipo: 'Despesa',
-    valor: 150.0,
+    valor: 650.0,
     fixoVariavel: 'Variável',
     parcelas: null,
     observacoes: 'Compra mensal',
@@ -129,11 +135,16 @@ const finance: Financa[] = [
   },
 ]
 
-export function TabelaDeValores() {
+interface TabelaDeValoresProps {
+  onTotalChange: (total: number) => void
+}
+
+export function TabelaDeValores({ onTotalChange }: TabelaDeValoresProps) {
   const [page, setPage] = useState(0)
   const [pageSize, setPageSize] = useState(10)
   const [edit, setEdit] = useState(false)
-  const [myFinances, setFinances] = useState<Financa>()
+  const [myFinances, setFinances] = useState<Financa | null>(null)
+  const [financeDelete, setFinanceDelete] = useState(false)
 
   // const [totalElements, setTotalElements] = useState(5)
   // const [isLoading, setIsLoading] = useState(false)
@@ -153,11 +164,18 @@ export function TabelaDeValores() {
   //   }
   // }
 
+  const calculateTotal = () => {
+    return finance.reduce((total, item) => {
+      return item.tipo === 'Receita' ? total + item.valor : total - item.valor
+    }, 0)
+  }
+
   const handelEdit = (item: Financa) => {
     setFinances(item)
     setEdit(true)
   }
   const handelDelete = (item: number) => {
+    setFinanceDelete(true)
     console.log(item)
   }
 
@@ -168,6 +186,11 @@ export function TabelaDeValores() {
     setPage(newPage)
   }
 
+  const hendleSalveEdit = () => {
+    console.log(myFinances)
+    setEdit(false)
+  }
+
   const handleChangeRowsPerPage = (
     event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
@@ -175,9 +198,24 @@ export function TabelaDeValores() {
     setPage(0)
   }
 
+  const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = event.target
+    setFinances((prev) => (prev ? { ...prev, [name!]: value as string } : null))
+  }
+
+  const handleSelectChange = (event: SelectChangeEvent<string>) => {
+    const { name, value } = event.target
+    setFinances((prev) => (prev ? { ...prev, [name!]: value } : null))
+  }
+
   // useEffect(() => {
   //   dadosCTE()
   // }, [page, pageSize])
+
+  useEffect(() => {
+    const total = calculateTotal()
+    onTotalChange(total)
+  }, [onTotalChange])
 
   return (
     <Box sx={{ margin: '1rem 0 1rem 0' }}>
@@ -201,11 +239,11 @@ export function TabelaDeValores() {
               <tbody>
                 {finance.map((item: Financa) => (
                   <tr key={item.id}>
-                    <td>{item.data}</td>
+                    <td>{formatDate(item.data)}</td>
                     <td>{item.categoria}</td>
                     <td>{item.descricao}</td>
                     <td>{item.tipo}</td>
-                    <td>{item.valor}</td>
+                    <td>{formatCurrency(item.valor)}</td>
                     <td>{item.fixoVariavel}</td>
                     <td>{item.parcelas}</td>
                     <td>{item.observacoes}</td>
@@ -259,69 +297,99 @@ export function TabelaDeValores() {
             sx={{ background: '#232f3e', color: '#f7f7f7' }}
             textAlign="center"
           >
-            Editar Finance
+            Editar Financa
           </DialogTitle>
           <DialogContent>
-            <DialogContentText>
-              <Grid container spacing={1} mt={3}>
-                <Grid item xs={12}>
-                  <TextField
-                    label="Data"
-                    type="date"
-                    value={myFinances?.data}
-                    fullWidth
-                    InputLabelProps={{ shrink: true }}
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <TextField
-                    label="Categoria"
-                    fullWidth
-                    value={myFinances?.categoria}
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <TextField
-                    label="Descrição"
-                    fullWidth
-                    value={myFinances?.descricao}
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <TextField label="Tipo" fullWidth value={myFinances?.tipo} />
-                </Grid>
-                <Grid item xs={12}>
-                  <TextField
-                    label="Valor (R$)"
-                    fullWidth
-                    value={myFinances?.valor}
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <TextField
-                    label="Categoria Despesas"
-                    fullWidth
-                    value={myFinances?.fixoVariavel}
-                  />
-                </Grid>
-                {myFinances?.parcelas && (
-                  <Grid item xs={12}>
-                    <TextField
-                      label="Parcelas"
-                      fullWidth
-                      value={myFinances?.parcelas}
-                    />
-                  </Grid>
-                )}
-                <Grid item xs={12}>
-                  <TextField
-                    label="Observações"
-                    fullWidth
-                    value={myFinances?.observacoes}
-                  />
-                </Grid>
+            <Grid container spacing={1} mt={3}>
+              <Grid item xs={12}>
+                <TextField
+                  name="data"
+                  label="Data"
+                  type="date"
+                  value={myFinances?.data || ''}
+                  fullWidth
+                  onChange={handleInputChange}
+                  InputLabelProps={{ shrink: true }}
+                />
               </Grid>
-            </DialogContentText>
+              <Grid item xs={12}>
+                <TextField
+                  name="categoria"
+                  label="Categoria"
+                  fullWidth
+                  onChange={handleInputChange}
+                  value={myFinances?.categoria || ''}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  name="descricao"
+                  label="Descrição"
+                  fullWidth
+                  onChange={handleInputChange}
+                  value={myFinances?.descricao || ''}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <FormControl fullWidth>
+                  <InputLabel id="select-label">Tipo</InputLabel>
+                  <Select
+                    name="tipo"
+                    labelId="select-label"
+                    value={myFinances?.tipo}
+                    onChange={handleSelectChange}
+                    label="Tipo"
+                  >
+                    <MenuItem value="Despesa">Despesa</MenuItem>
+                    <MenuItem value="Receita">Receita</MenuItem>
+                  </Select>
+                </FormControl>
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  name="valor"
+                  label="Valor (R$)"
+                  fullWidth
+                  onChange={handleInputChange}
+                  value={myFinances?.valor || ''}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <FormControl fullWidth>
+                  <InputLabel>Categoria Despesa</InputLabel>
+                  <Select
+                    name="fixoVariavel"
+                    value={myFinances?.fixoVariavel}
+                    label="Categoria Despesa"
+                    onChange={handleSelectChange}
+                  >
+                    <MenuItem value="Fixo">Fixo</MenuItem>
+                    <MenuItem value="Variável">Variável</MenuItem>
+                    <MenuItem value="Parcela">Parcela</MenuItem>
+                  </Select>
+                </FormControl>
+              </Grid>
+              {myFinances?.fixoVariavel === 'Parcela' && (
+                <Grid item xs={12}>
+                  <TextField
+                    name="parcelas"
+                    label="Parcelas"
+                    fullWidth
+                    onChange={handleInputChange}
+                    value={myFinances?.parcelas || ''}
+                  />
+                </Grid>
+              )}
+              <Grid item xs={12}>
+                <TextField
+                  name="observacoes"
+                  label="Observações"
+                  fullWidth
+                  onChange={handleInputChange}
+                  value={myFinances?.observacoes || ''}
+                />
+              </Grid>
+            </Grid>
           </DialogContent>
           <DialogActions>
             <Grid container justifyContent="end" spacing={1} mr={2}>
@@ -329,7 +397,7 @@ export function TabelaDeValores() {
                 <Button
                   fullWidth
                   variant="contained"
-                  onClick={() => setEdit(false)}
+                  onClick={() => hendleSalveEdit()}
                   color="primary"
                 >
                   Salvar
@@ -343,6 +411,41 @@ export function TabelaDeValores() {
                   color="warning"
                 >
                   Cancel
+                </Button>
+              </Grid>
+            </Grid>
+          </DialogActions>
+        </Dialog>
+        <Dialog open={financeDelete} onClose={() => setFinanceDelete(false)}>
+          <DialogTitle
+            sx={{ background: '#232f3e', color: '#f7f7f7' }}
+            textAlign="center"
+          >
+            Excluir Finança
+          </DialogTitle>
+          <DialogContent>
+            <DialogContentText mt={2}>
+              Tem certeza que deseja excluir este registro?
+            </DialogContentText>
+          </DialogContent>
+          <DialogActions>
+            <Grid container spacing={1} justifyContent="space-evenly">
+              <Grid item xs={3}>
+                <Button
+                  variant="contained"
+                  onClick={() => setFinanceDelete(false)}
+                  color="warning"
+                >
+                  Cancelar
+                </Button>
+              </Grid>
+              <Grid item xs={3}>
+                <Button
+                  variant="contained"
+                  onClick={() => setFinanceDelete(false)}
+                  color="primary"
+                >
+                  Confirmar
                 </Button>
               </Grid>
             </Grid>
