@@ -3,6 +3,7 @@ import { ToastContainer } from 'react-toastify'
 import { AppBar, Box, Grid, Toolbar, Typography } from '@mui/material'
 import { Router } from './routes/router'
 import './App.css'
+import 'react-toastify/dist/ReactToastify.css'
 
 export const App = () => {
   return (

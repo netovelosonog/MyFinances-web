@@ -19,8 +19,9 @@ import {
 } from '@mui/material'
 import { ProductsList } from './style'
 import { ChangeEvent, useEffect, useState } from 'react'
-import { Financa } from '../../models/tabelaGeral'
+import { Financa, FinancaAdd } from '../../models/tabelaGeral'
 import { formatCurrency, formatDate } from '../../functions'
+import { toast } from 'react-toastify'
 
 const finance: Financa[] = [
   {
@@ -145,6 +146,83 @@ export function TabelaDeValores({ onTotalChange }: TabelaDeValoresProps) {
   const [edit, setEdit] = useState(false)
   const [myFinances, setFinances] = useState<Financa | null>(null)
   const [financeDelete, setFinanceDelete] = useState(false)
+  const [financeAdd, setFinanceAdd] = useState(false)
+  const [formValuesAdd, setFormValuesAdd] = useState<FinancaAdd>({
+    data: '',
+    categoria: '',
+    descricao: '',
+    tipo: 'Despesa',
+    valor: undefined,
+    fixoVariavel: 'Fixo',
+    parcelas: undefined,
+    observacoes: '',
+  })
+
+  const [errors, setErrors] = useState<Record<string, boolean>>({
+    data: false,
+    categoria: false,
+    descricao: false,
+    tipo: false,
+    valor: false,
+    fixoVariavel: false,
+    parcelas: false,
+    observacoes: false,
+  })
+
+  const handleInputChangeAdd = (
+    event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => {
+    const { name, value } = event.target
+    setFormValuesAdd({
+      ...formValuesAdd,
+      [name]:
+        name === 'valor' || name === 'parcelas' ? parseFloat(value) : value,
+    })
+  }
+
+  const handleSelectChangeAdd = (event: SelectChangeEvent<string>) => {
+    const { name, value } = event.target
+    setFormValuesAdd({
+      ...formValuesAdd,
+      [name as string]: value,
+    })
+  }
+
+  const isFormValid = (): boolean => {
+    const newErrors: Record<string, boolean> = {}
+    let valid = true
+
+    for (const key in formValuesAdd) {
+      if (key === 'valor' || key === 'parcelas') {
+        if (formValuesAdd[key as keyof FinancaAdd] === undefined) {
+          newErrors[key] = true
+          valid = false
+        } else {
+          newErrors[key] = false
+        }
+      } else if (key !== 'observacoes') {
+        if (formValuesAdd[key as keyof FinancaAdd] === '') {
+          newErrors[key] = true
+          valid = false
+        } else {
+          newErrors[key] = false
+        }
+      }
+    }
+
+    if (
+      formValuesAdd.fixoVariavel === 'Parcela' &&
+      (formValuesAdd.parcelas === undefined || formValuesAdd.parcelas === 0)
+    ) {
+      newErrors.parcelas = true
+      valid = false
+    } else {
+      newErrors.parcelas = false
+    }
+
+    setErrors(newErrors)
+    return valid
+  }
 
   // const [totalElements, setTotalElements] = useState(5)
   // const [isLoading, setIsLoading] = useState(false)
@@ -191,6 +269,15 @@ export function TabelaDeValores({ onTotalChange }: TabelaDeValoresProps) {
     setEdit(false)
   }
 
+  const handleSaveAdd = () => {
+    if (isFormValid()) {
+      console.log(formValuesAdd)
+      setFinanceAdd(false)
+    } else {
+      toast.warning('Por favor, preencha todos os campos obrigatórios.')
+    }
+  }
+
   const handleChangeRowsPerPage = (
     event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
@@ -221,74 +308,88 @@ export function TabelaDeValores({ onTotalChange }: TabelaDeValoresProps) {
     <Box sx={{ margin: '1rem 0 1rem 0' }}>
       {finance && (
         <Box>
-          <ProductsList>
-            <table>
-              <thead>
-                <tr>
-                  <th>Data</th>
-                  <th>Categoria</th>
-                  <th>Descrição</th>
-                  <th>Tipo</th>
-                  <th>Valor (R$)</th>
-                  <th>Categoria Despesa</th>
-                  <th>Parcelas</th>
-                  <th>Observações</th>
-                  <th>Ações</th>
-                </tr>
-              </thead>
-              <tbody>
-                {finance.map((item: Financa) => (
-                  <tr key={item.id}>
-                    <td>{formatDate(item.data)}</td>
-                    <td>{item.categoria}</td>
-                    <td>{item.descricao}</td>
-                    <td>{item.tipo}</td>
-                    <td>{formatCurrency(item.valor)}</td>
-                    <td>{item.fixoVariavel}</td>
-                    <td>{item.parcelas}</td>
-                    <td>{item.observacoes}</td>
-                    <td>
-                      <Grid container spacing={1}>
-                        <Grid item xs={6}>
-                          <IconButton
-                            color="info"
-                            onClick={() => handelEdit(item)}
-                            aria-label="edit"
-                          >
-                            <Icon>edit</Icon>
-                          </IconButton>
-                        </Grid>
-                        <Grid item xs={6}>
-                          <IconButton
-                            color="error"
-                            onClick={() => handelDelete(item.id)}
-                            aria-label="delete"
-                          >
-                            <Icon>delete</Icon>
-                          </IconButton>
-                        </Grid>
-                      </Grid>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </ProductsList>
-          <TablePagination
-            sx={{
-              background: '#232f3e',
-              marginTop: '0.2rem',
-              color: '#f7f7f7',
-              borderBottomLeftRadius: '8px',
-              borderBottomRightRadius: '8px',
-            }}
-            component="div"
-            count={finance.length}
-            page={page}
-            onPageChange={handleChangePage}
-            rowsPerPage={pageSize}
-            onRowsPerPageChange={handleChangeRowsPerPage}
-          />
+          <Grid container justifyContent="end" spacing={1}>
+            <Grid item xs={3}>
+              <Button
+                fullWidth
+                variant="contained"
+                onClick={() => setFinanceAdd(true)}
+                sx={{ background: '#232f3e' }}
+              >
+                Nova Finança
+              </Button>
+            </Grid>
+            <Grid item xs={12}>
+              <ProductsList>
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Data</th>
+                      <th>Categoria</th>
+                      <th>Descrição</th>
+                      <th>Tipo</th>
+                      <th>Valor (R$)</th>
+                      <th>Categoria Despesa</th>
+                      <th>Parcelas</th>
+                      <th>Observações</th>
+                      <th>Ações</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {finance.map((item: Financa) => (
+                      <tr key={item.id}>
+                        <td>{formatDate(item.data)}</td>
+                        <td>{item.categoria}</td>
+                        <td>{item.descricao}</td>
+                        <td>{item.tipo}</td>
+                        <td>{formatCurrency(item.valor)}</td>
+                        <td>{item.fixoVariavel}</td>
+                        <td>{item.parcelas}</td>
+                        <td>{item.observacoes}</td>
+                        <td>
+                          <Grid container spacing={1}>
+                            <Grid item xs={6}>
+                              <IconButton
+                                color="info"
+                                onClick={() => handelEdit(item)}
+                                aria-label="edit"
+                              >
+                                <Icon>edit</Icon>
+                              </IconButton>
+                            </Grid>
+                            <Grid item xs={6}>
+                              <IconButton
+                                color="error"
+                                onClick={() => handelDelete(item.id)}
+                                aria-label="delete"
+                              >
+                                <Icon>delete</Icon>
+                              </IconButton>
+                            </Grid>
+                          </Grid>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </ProductsList>
+              <TablePagination
+                sx={{
+                  background: '#232f3e',
+                  marginTop: '0.2rem',
+                  color: '#f7f7f7',
+                  borderBottomLeftRadius: '8px',
+                  borderBottomRightRadius: '8px',
+                }}
+                component="div"
+                count={finance.length}
+                page={page}
+                onPageChange={handleChangePage}
+                rowsPerPage={pageSize}
+                onRowsPerPageChange={handleChangeRowsPerPage}
+              />
+            </Grid>
+          </Grid>
         </Box>
       )}
       <Box>
@@ -446,6 +547,142 @@ export function TabelaDeValores({ onTotalChange }: TabelaDeValoresProps) {
                   color="primary"
                 >
                   Confirmar
+                </Button>
+              </Grid>
+            </Grid>
+          </DialogActions>
+        </Dialog>
+        <Dialog open={financeAdd}>
+          <DialogTitle
+            sx={{ background: '#232f3e', color: '#f7f7f7' }}
+            textAlign="center"
+          >
+            Adicionar Financa
+          </DialogTitle>
+          <DialogContent>
+            <Grid container spacing={1} mt={3}>
+              <Grid item xs={12}>
+                <TextField
+                  name="data"
+                  label="Data"
+                  type="date"
+                  fullWidth
+                  value={formValuesAdd.data}
+                  onChange={handleInputChangeAdd}
+                  InputLabelProps={{ shrink: true }}
+                  error={errors.data}
+                  helperText={errors.data ? 'Campo obrigatório' : ''}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  name="categoria"
+                  label="Categoria"
+                  fullWidth
+                  value={formValuesAdd.categoria}
+                  onChange={handleInputChangeAdd}
+                  error={errors.categoria}
+                  helperText={errors.categoria ? 'Campo obrigatório' : ''}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  name="descricao"
+                  label="Descrição"
+                  fullWidth
+                  value={formValuesAdd.descricao}
+                  onChange={handleInputChangeAdd}
+                  error={errors.descricao}
+                  helperText={errors.descricao ? 'Campo obrigatório' : ''}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <FormControl fullWidth>
+                  <InputLabel id="select-label">Tipo</InputLabel>
+                  <Select
+                    name="tipo"
+                    labelId="select-label"
+                    value={formValuesAdd.tipo}
+                    onChange={handleSelectChangeAdd}
+                    label="Tipo"
+                  >
+                    <MenuItem value="Despesa">Despesa</MenuItem>
+                    <MenuItem value="Receita">Receita</MenuItem>
+                  </Select>
+                </FormControl>
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  name="valor"
+                  label="Valor (R$)"
+                  fullWidth
+                  type="number"
+                  value={formValuesAdd.valor}
+                  onChange={handleInputChangeAdd}
+                  error={errors.valor}
+                  helperText={errors.valor ? 'Campo obrigatório' : ''}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <FormControl fullWidth>
+                  <InputLabel>Categoria Despesa</InputLabel>
+                  <Select
+                    name="fixoVariavel"
+                    label="Categoria Despesa"
+                    value={formValuesAdd.fixoVariavel}
+                    onChange={handleSelectChangeAdd}
+                  >
+                    <MenuItem value="Fixo">Fixo</MenuItem>
+                    <MenuItem value="Variável">Variável</MenuItem>
+                    <MenuItem value="Parcela">Parcela</MenuItem>
+                  </Select>
+                </FormControl>
+              </Grid>
+              {formValuesAdd.fixoVariavel === 'Parcela' && (
+                <Grid item xs={12}>
+                  <TextField
+                    name="parcelas"
+                    label="Parcelas"
+                    fullWidth
+                    type="number"
+                    value={formValuesAdd.parcelas ?? ''}
+                    onChange={handleInputChangeAdd}
+                    error={errors.parcelas}
+                    helperText={errors.parcelas ? 'Campo obrigatório' : ''}
+                  />
+                </Grid>
+              )}
+              <Grid item xs={12}>
+                <TextField
+                  name="observacoes"
+                  label="Observações"
+                  fullWidth
+                  value={formValuesAdd.observacoes ?? ''}
+                  onChange={handleInputChangeAdd}
+                />
+              </Grid>
+            </Grid>
+          </DialogContent>
+          <DialogActions>
+            <Grid container justifyContent="end" spacing={1} mr={2}>
+              <Grid item xs={3}>
+                <Button
+                  fullWidth
+                  variant="contained"
+                  onClick={handleSaveAdd}
+                  color="primary"
+                >
+                  Salvar
+                </Button>
+              </Grid>
+              <Grid item xs={3}>
+                <Button
+                  fullWidth
+                  variant="contained"
+                  onClick={() => setFinanceAdd(false)}
+                  color="warning"
+                >
+                  Cancelar
                 </Button>
               </Grid>
             </Grid>
