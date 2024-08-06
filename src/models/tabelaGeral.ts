@@ -6,7 +6,7 @@ export interface Financa {
   tipo: 'Despesa' | 'Receita'
   valor: number
   fixoVariavel: 'Fixo' | 'Variável' | 'Parcela'
-  parcelas: number | null
+  parcelas?: number
   observacoes: string | null
 }
 
@@ -15,8 +15,8 @@ export interface FinancaAdd {
   categoria: string
   descricao: string
   tipo: 'Despesa' | 'Receita'
-  valor: number | undefined
+  valor: number | null
   fixoVariavel: 'Fixo' | 'Variável' | 'Parcela'
-  parcelas: number | undefined
-  observacoes: string
+  parcelas?: number
+  observacoes?: string
 }

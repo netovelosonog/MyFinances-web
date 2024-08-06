@@ -32,7 +32,6 @@ const finance: Financa[] = [
     tipo: 'Despesa',
     valor: 650.0,
     fixoVariavel: 'Variável',
-    parcelas: null,
     observacoes: 'Compra mensal',
   },
   {
@@ -43,7 +42,6 @@ const finance: Financa[] = [
     tipo: 'Despesa',
     valor: 200.0,
     fixoVariavel: 'Variável',
-    parcelas: null,
     observacoes: null,
   },
   {
@@ -54,7 +52,6 @@ const finance: Financa[] = [
     tipo: 'Despesa',
     valor: 50.0,
     fixoVariavel: 'Variável',
-    parcelas: null,
     observacoes: null,
   },
   {
@@ -65,7 +62,6 @@ const finance: Financa[] = [
     tipo: 'Despesa',
     valor: 100.0,
     fixoVariavel: 'Variável',
-    parcelas: null,
     observacoes: 'Plano de saúde',
   },
   {
@@ -76,7 +72,6 @@ const finance: Financa[] = [
     tipo: 'Receita',
     valor: 3000.0,
     fixoVariavel: 'Fixo',
-    parcelas: null,
     observacoes: null,
   },
   {
@@ -98,7 +93,6 @@ const finance: Financa[] = [
     tipo: 'Despesa',
     valor: 1200.0,
     fixoVariavel: 'Fixo',
-    parcelas: null,
     observacoes: null,
   },
   {
@@ -109,7 +103,6 @@ const finance: Financa[] = [
     tipo: 'Receita',
     valor: 500.0,
     fixoVariavel: 'Variável',
-    parcelas: null,
     observacoes: null,
   },
   {
@@ -120,7 +113,6 @@ const finance: Financa[] = [
     tipo: 'Despesa',
     valor: 80.0,
     fixoVariavel: 'Variável',
-    parcelas: null,
     observacoes: 'Almoço com amigos',
   },
   {
@@ -131,7 +123,6 @@ const finance: Financa[] = [
     tipo: 'Despesa',
     valor: 30.0,
     fixoVariavel: 'Variável',
-    parcelas: null,
     observacoes: 'Viagem de trabalho',
   },
 ]
@@ -152,9 +143,9 @@ export function TabelaDeValores({ onTotalChange }: TabelaDeValoresProps) {
     categoria: '',
     descricao: '',
     tipo: 'Despesa',
-    valor: undefined,
-    fixoVariavel: 'Fixo',
-    parcelas: undefined,
+    valor: null,
+    fixoVariavel: 'Variável',
+    parcelas: 0,
     observacoes: '',
   })
 
@@ -188,13 +179,27 @@ export function TabelaDeValores({ onTotalChange }: TabelaDeValoresProps) {
     })
   }
 
+  const newFinanceAdd = () => {
+    setFormValuesAdd({
+      data: '',
+      categoria: '',
+      descricao: '',
+      tipo: 'Despesa',
+      valor: null,
+      fixoVariavel: 'Variável',
+      parcelas: 0,
+      observacoes: '',
+    })
+    setFinanceAdd(true)
+  }
+
   const isFormValid = (): boolean => {
     const newErrors: Record<string, boolean> = {}
     let valid = true
 
     for (const key in formValuesAdd) {
       if (key === 'valor' || key === 'parcelas') {
-        if (formValuesAdd[key as keyof FinancaAdd] === undefined) {
+        if (formValuesAdd[key as keyof FinancaAdd] === null) {
           newErrors[key] = true
           valid = false
         } else {
@@ -210,14 +215,15 @@ export function TabelaDeValores({ onTotalChange }: TabelaDeValoresProps) {
       }
     }
 
-    if (
-      formValuesAdd.fixoVariavel === 'Parcela' &&
-      (formValuesAdd.parcelas === undefined || formValuesAdd.parcelas === 0)
-    ) {
-      newErrors.parcelas = true
-      valid = false
+    if (formValuesAdd.fixoVariavel === 'Parcela') {
+      if (formValuesAdd.parcelas === undefined || formValuesAdd.parcelas <= 0) {
+        newErrors.parcelas = true;
+        valid = false;
+      } else {
+        newErrors.parcelas = false;
+      }
     } else {
-      newErrors.parcelas = false
+      newErrors.parcelas = false;
     }
 
     setErrors(newErrors)
@@ -271,12 +277,17 @@ export function TabelaDeValores({ onTotalChange }: TabelaDeValoresProps) {
 
   const handleSaveAdd = () => {
     if (isFormValid()) {
-      console.log(formValuesAdd)
-      setFinanceAdd(false)
+      const { parcelas, ...otherValues } = formValuesAdd;
+      const financeToSave = formValuesAdd.fixoVariavel === 'Parcela'
+        ? { ...formValuesAdd }
+        : otherValues;
+  
+      console.log("financeToSave", financeToSave);
+      setFinanceAdd(false);
     } else {
-      toast.warning('Por favor, preencha todos os campos obrigatórios.')
+      toast.warning('Por favor, preencha todos os campos obrigatórios.');
     }
-  }
+  };
 
   const handleChangeRowsPerPage = (
     event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
@@ -313,8 +324,8 @@ export function TabelaDeValores({ onTotalChange }: TabelaDeValoresProps) {
               <Button
                 fullWidth
                 variant="contained"
-                onClick={() => setFinanceAdd(true)}
-                sx={{ background: '#232f3e' }}
+                onClick={newFinanceAdd}
+                sx={{ background: '#131921', '&:hover':{background: '#232f3e'} }}
               >
                 Nova Finança
               </Button>
