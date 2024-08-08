@@ -16,6 +16,7 @@ import {
   Select,
   MenuItem,
   SelectChangeEvent,
+  Card,
 } from '@mui/material'
 import { ProductsList } from './style'
 import { ChangeEvent, useEffect, useState } from 'react'
@@ -217,13 +218,13 @@ export function TabelaDeValores({ onTotalChange }: TabelaDeValoresProps) {
 
     if (formValuesAdd.fixoVariavel === 'Parcela') {
       if (formValuesAdd.parcelas === undefined || formValuesAdd.parcelas <= 0) {
-        newErrors.parcelas = true;
-        valid = false;
+        newErrors.parcelas = true
+        valid = false
       } else {
-        newErrors.parcelas = false;
+        newErrors.parcelas = false
       }
     } else {
-      newErrors.parcelas = false;
+      newErrors.parcelas = false
     }
 
     setErrors(newErrors)
@@ -277,17 +278,18 @@ export function TabelaDeValores({ onTotalChange }: TabelaDeValoresProps) {
 
   const handleSaveAdd = () => {
     if (isFormValid()) {
-      const { parcelas, ...otherValues } = formValuesAdd;
-      const financeToSave = formValuesAdd.fixoVariavel === 'Parcela'
-        ? { ...formValuesAdd }
-        : otherValues;
-  
-      console.log("financeToSave", financeToSave);
-      setFinanceAdd(false);
+      const { ...otherValues } = formValuesAdd
+      const financeToSave =
+        formValuesAdd.fixoVariavel === 'Parcela'
+          ? { ...formValuesAdd }
+          : otherValues
+
+      console.log('financeToSave', financeToSave)
+      setFinanceAdd(false)
     } else {
-      toast.warning('Por favor, preencha todos os campos obrigatórios.');
+      toast.warning('Por favor, preencha todos os campos obrigatórios.')
     }
-  };
+  }
 
   const handleChangeRowsPerPage = (
     event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
@@ -325,80 +327,85 @@ export function TabelaDeValores({ onTotalChange }: TabelaDeValoresProps) {
                 fullWidth
                 variant="contained"
                 onClick={newFinanceAdd}
-                sx={{ background: '#131921', '&:hover':{background: '#232f3e'} }}
+                sx={{
+                  background: '#131921',
+                  '&:hover': { background: '#232f3e' },
+                }}
               >
                 Nova Finança
               </Button>
             </Grid>
             <Grid item xs={12}>
-              <ProductsList>
-                <table>
-                  <thead>
-                    <tr>
-                      <th>Data</th>
-                      <th>Categoria</th>
-                      <th>Descrição</th>
-                      <th>Tipo</th>
-                      <th>Valor (R$)</th>
-                      <th>Categoria Despesa</th>
-                      <th>Parcelas</th>
-                      <th>Observações</th>
-                      <th>Ações</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {finance.map((item: Financa) => (
-                      <tr key={item.id}>
-                        <td>{formatDate(item.data)}</td>
-                        <td>{item.categoria}</td>
-                        <td>{item.descricao}</td>
-                        <td>{item.tipo}</td>
-                        <td>{formatCurrency(item.valor)}</td>
-                        <td>{item.fixoVariavel}</td>
-                        <td>{item.parcelas}</td>
-                        <td>{item.observacoes}</td>
-                        <td>
-                          <Grid container spacing={1}>
-                            <Grid item xs={6}>
-                              <IconButton
-                                color="info"
-                                onClick={() => handelEdit(item)}
-                                aria-label="edit"
-                              >
-                                <Icon>edit</Icon>
-                              </IconButton>
-                            </Grid>
-                            <Grid item xs={6}>
-                              <IconButton
-                                color="error"
-                                onClick={() => handelDelete(item.id)}
-                                aria-label="delete"
-                              >
-                                <Icon>delete</Icon>
-                              </IconButton>
-                            </Grid>
-                          </Grid>
-                        </td>
+              <Card elevation={6} sx={{ borderRadius: '8px' }}>
+                <ProductsList>
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Data</th>
+                        <th>Categoria</th>
+                        <th>Descrição</th>
+                        <th>Tipo</th>
+                        <th>Valor (R$)</th>
+                        <th>Categoria Despesa</th>
+                        <th>Parcelas</th>
+                        <th>Observações</th>
+                        <th>Ações</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </ProductsList>
-              <TablePagination
-                sx={{
-                  background: '#232f3e',
-                  marginTop: '0.2rem',
-                  color: '#f7f7f7',
-                  borderBottomLeftRadius: '8px',
-                  borderBottomRightRadius: '8px',
-                }}
-                component="div"
-                count={finance.length}
-                page={page}
-                onPageChange={handleChangePage}
-                rowsPerPage={pageSize}
-                onRowsPerPageChange={handleChangeRowsPerPage}
-              />
+                    </thead>
+                    <tbody>
+                      {finance.map((item: Financa) => (
+                        <tr key={item.id}>
+                          <td>{formatDate(item.data)}</td>
+                          <td>{item.categoria}</td>
+                          <td>{item.descricao}</td>
+                          <td>{item.tipo}</td>
+                          <td>{formatCurrency(item.valor)}</td>
+                          <td>{item.fixoVariavel}</td>
+                          <td>{item.parcelas}</td>
+                          <td>{item.observacoes}</td>
+                          <td>
+                            <Grid container spacing={1}>
+                              <Grid item xs={6}>
+                                <IconButton
+                                  color="info"
+                                  onClick={() => handelEdit(item)}
+                                  aria-label="edit"
+                                >
+                                  <Icon>edit</Icon>
+                                </IconButton>
+                              </Grid>
+                              <Grid item xs={6}>
+                                <IconButton
+                                  color="error"
+                                  onClick={() => handelDelete(item.id)}
+                                  aria-label="delete"
+                                >
+                                  <Icon>delete</Icon>
+                                </IconButton>
+                              </Grid>
+                            </Grid>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </ProductsList>
+                <TablePagination
+                  sx={{
+                    background: '#232f3e',
+                    marginTop: '0.2rem',
+                    color: '#f7f7f7',
+                    borderBottomLeftRadius: '8px',
+                    borderBottomRightRadius: '8px',
+                  }}
+                  component="div"
+                  count={finance.length}
+                  page={page}
+                  onPageChange={handleChangePage}
+                  rowsPerPage={pageSize}
+                  onRowsPerPageChange={handleChangeRowsPerPage}
+                />
+              </Card>
             </Grid>
           </Grid>
         </Box>
