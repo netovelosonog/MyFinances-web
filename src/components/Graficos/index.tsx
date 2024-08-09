@@ -82,64 +82,71 @@ export const FinanceCharts: React.FC<FinanceChartsProps> = ({ finance }) => {
 
   return (
     <Grid container spacing={1} justifyContent="space-evenly">
-      <Grid item xs={12} sm={6} md={6} lg={6}>
-        <Card
-          elevation={6}
+  <Grid item xs={12} sm={6} md={6} lg={6}>
+    <Card
+      elevation={6}
+      sx={{
+        borderRadius: '8px',
+        height: '100%', // Para garantir que ambos os cards tenham a mesma altura
+      }}
+    >
+      <Grid container justifyContent="center" sx={{ height: '100%' }}>
+        <Grid item xs={12}>
+          <Typography variant="h6" textAlign="center">
+            Gráfico de Receita e Despesa do Último Mês
+          </Typography>
+        </Grid>
+        <Grid
+          item
+          xs={12}
           sx={{
-            borderRadius: '8px',
+            height: 'auto',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            flexGrow: 1,
+            minHeight: '12rem',
+            maxHeight: '40rem'
           }}
         >
-          <Grid container justifyContent="center">
-            <Grid item xs={12}>
-              <Typography variant="h6" textAlign="center">
-                Gráfico de Receita e Despesa do Último Mês
-              </Typography>
-            </Grid>
-            <Grid
-              item
-              xs={12}
-              sx={{
-                height: 'auto',
-                minHeight: { xs: 310, sm: 400, md: 400, lg: 400 },
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
-              }}
-            >
-              <Pie data={dataPie} />
-            </Grid>
-          </Grid>
-        </Card>
+          <Pie data={dataPie} />
+        </Grid>
       </Grid>
-      <Grid item xs={12} sm={6} md={6} lg={6}>
-        <Card
-          elevation={6}
+    </Card>
+  </Grid>
+  <Grid item xs={12} sm={6} md={6} lg={6}>
+    <Card
+      elevation={6}
+      sx={{
+        borderRadius: '8px',
+        height: '100%', // Para garantir que ambos os cards tenham a mesma altura
+      }}
+    >
+      <Grid container justifyContent="center" alignItems="center" sx={{ height: '100%' }}>
+        <Grid item xs={12}>
+          <Typography variant="h6" textAlign="center">
+            Gráfico de Linha (Diferença Mensal)
+          </Typography>
+        </Grid>
+        <Grid
+          item
+          xs={12}
           sx={{
-            borderRadius: '8px',
+            height: 'auto',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            flexGrow: 1,
+            minHeight: '12rem',
+            maxHeight: '40rem'
           }}
         >
-          <Grid container justifyContent="center" alignItems="center">
-            <Grid item xs={12}>
-              <Typography variant="h6" textAlign="center">
-                Gráfico de Linha (Diferença Mensal)
-              </Typography>
-            </Grid>
-            <Grid
-              item
-              xs={12}
-              sx={{
-                height: 'auto',
-                minHeight: { xs: 310, sm: 400, md: 400, lg: 400 },
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
-              }}
-            >
-              <Line data={dataLine} />
-            </Grid>
-          </Grid>
-        </Card>
+          <Line data={dataLine} />
+        </Grid>
       </Grid>
-    </Grid>
+    </Card>
+  </Grid>
+</Grid>
+
   )
 }
