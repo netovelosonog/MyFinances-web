@@ -105,8 +105,8 @@ export const FinanceCharts: React.FC<FinanceChartsProps> = ({ finance }) => {
             justifyContent: 'center',
             alignItems: 'center',
             flexGrow: 1,
-            minHeight: '12rem',
-            maxHeight: '40rem'
+            minHeight: '14rem',
+            maxHeight: '25rem'
           }}
         >
           <Pie data={dataPie} />
@@ -137,8 +137,8 @@ export const FinanceCharts: React.FC<FinanceChartsProps> = ({ finance }) => {
             justifyContent: 'center',
             alignItems: 'center',
             flexGrow: 1,
-            minHeight: '12rem',
-            maxHeight: '40rem'
+            minHeight: '14rem',
+            maxHeight: '25rem'
           }}
         >
           <Line data={dataLine} />

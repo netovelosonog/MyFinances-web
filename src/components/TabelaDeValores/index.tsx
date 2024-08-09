@@ -322,7 +322,7 @@ export function TabelaDeValores({ onTotalChange }: TabelaDeValoresProps) {
       {finance && (
         <Box>
           <Grid container justifyContent="end" spacing={1}>
-            <Grid item xs={3}>
+            <Grid item xs={8} sm={4} md={4} lg={3}>
               <Button
                 fullWidth
                 variant="contained"
